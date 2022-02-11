@@ -1,23 +1,73 @@
-import logo from './logo.svg';
-import './App.css';
+import { useEffect, useState } from "react";
+import "./index.css";
+import { io } from "socket.io-client";
+
+const socket = io("http://localhost:8000");
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+  const [messageElements, setMessageElements] = useState();
+
+  function addMessage(msgContent) {
+    const tempMessages = messages;
+    tempMessages.push(msgContent);
+    setMessages(tempMessages);
+  }
+
+  useEffect(() => {
+    socket.on("connect", () => {
+      addMessage(`You are connected at ${socket.id}`);
+      updateMessageElements();
+    });
+
+    socket.on("receive-message", (obj) => {
+      addMessage(obj.message);
+      updateMessageElements();
+    });
+  });
+
+  function updateMessageElements() {
+    setMessageElements(
+      messages.map((message, key) => (
+        <p key={key} className="message">
+          {message}
         </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+      ))
+    );
+  }
+
+  function sendMessageToServer() {
+    socket.emit("send-message", { message: input });
+  }
+
+  function handleSubmit(e) {
+    e.preventDefault();
+    if (input.length !== 0) {
+      addMessage(input);
+      updateMessageElements();
+      setInput("");
+      sendMessageToServer();
+    }
+  }
+
+  return (
+    <div className="app-container">
+      <header>
+        <h2>Messages</h2>
       </header>
+
+      <div className="message-container">{messageElements}</div>
+      <div className="message-input">
+        <form onSubmit={handleSubmit}>
+          <input
+            value={input}
+            type="text"
+            onChange={(e) => setInput(e.target.value)}
+          ></input>
+          <button type="submit">send</button>
+        </form>
+      </div>
     </div>
   );
 }

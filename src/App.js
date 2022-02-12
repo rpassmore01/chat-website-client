@@ -25,7 +25,7 @@ function App() {
       addMessage(obj.message);
       updateMessageElements();
     });
-  });
+  }, [socket]);
 
   function updateMessageElements() {
     setMessageElements(

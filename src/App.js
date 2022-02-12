@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./index.css";
 import { io } from "socket.io-client";
 
@@ -9,6 +9,8 @@ function App() {
   const [input, setInput] = useState("");
   const [messageElements, setMessageElements] = useState();
   const [roomInput, setRoomInput] = useState("");
+
+  const messageEndRef = React.createRef();
 
   function addMessage(msgContent) {
     const tempMessages = messages;
@@ -52,6 +54,10 @@ function App() {
     }
   }
 
+  useEffect(() => {
+    messageEndRef.current.scrollIntoView({ behavior: "smooth" });
+  }, [messageElements]);
+
   function handleJoin() {
     socket.emit("join-room", roomInput);
   }
@@ -62,8 +68,9 @@ function App() {
         <h2>Messages</h2>
       </header>
 
-      <div className="message-container" id="message-container">
+      <div className="message-container">
         {messageElements}
+        <div ref={messageEndRef} />
       </div>
       <div className="message-input">
         <form onSubmit={handleSubmit}>

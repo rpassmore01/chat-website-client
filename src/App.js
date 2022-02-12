@@ -8,6 +8,7 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [messageElements, setMessageElements] = useState();
+  const [roomInput, setRoomInput] = useState("");
 
   function addMessage(msgContent) {
     const tempMessages = messages;
@@ -38,7 +39,7 @@ function App() {
   }
 
   function sendMessageToServer() {
-    socket.emit("send-message", { message: input });
+    socket.emit("send-message", { message: input }, roomInput);
   }
 
   function handleSubmit(e) {
@@ -51,13 +52,19 @@ function App() {
     }
   }
 
+  function handleJoin() {
+    socket.emit("join-room", roomInput);
+  }
+
   return (
     <div className="app-container">
       <header>
         <h2>Messages</h2>
       </header>
 
-      <div className="message-container">{messageElements}</div>
+      <div className="message-container" id="message-container">
+        {messageElements}
+      </div>
       <div className="message-input">
         <form onSubmit={handleSubmit}>
           <input
@@ -66,6 +73,12 @@ function App() {
             onChange={(e) => setInput(e.target.value)}
           ></input>
           <button type="submit">send</button>
+          <input
+            value={roomInput}
+            type="text"
+            onChange={(e) => setRoomInput(e.target.value)}
+          ></input>
+          <button onClick={handleJoin}>join</button>
         </form>
       </div>
     </div>
